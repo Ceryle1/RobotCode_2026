@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.427218259629101,
+        "y": 7.560784593437946
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.190177826993334,
+        "y": 7.427317116353127
+      },
+      "isLocked": false,
+      "linkedName": "ShootUnderTrench"
+    },
+    {
+      "anchor": {
+        "x": 1.4878666666666667,
+        "y": 5.0776555555555545
+      },
+      "prevControl": {
+        "x": 1.2247666666666663,
+        "y": 6.919355555555554
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": "AL1_AutoLeft",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "useDefaultConstraints": true
+}
