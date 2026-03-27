@@ -24,68 +24,14 @@ public record ChoreoTraj(
     Pose2d initialPoseBlue,
     Pose2d endPoseBlue
 ) {
-    public static final ChoreoTraj autoLlanura = new ChoreoTraj(
-        "autoLlanura",
-        OptionalInt.empty(),
-        5.43539,
-        new Pose2d(4.26954, 0.69309, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(2.75483, 0.64334, Rotation2d.fromRadians(-1.7741))
-    );
-    public static final ChoreoTraj autoPorFavorNo = new ChoreoTraj(
-        "autoPorFavorNo",
-        OptionalInt.empty(),
-        8.73415,
-        new Pose2d(4.23087, 0.65443, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(4.2502, 0.59643, Rotation2d.fromRadians(-1.5708))
-    );
-    public static final ChoreoTraj autoYa = new ChoreoTraj(
-        "autoYa",
-        OptionalInt.empty(),
-        4.36575,
-        new Pose2d(4.35301, 0.66283, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(4.35301, 0.68232, Rotation2d.fromRadians(1.5708))
-    );
-    public static final ChoreoTraj auto1Cycle3 = new ChoreoTraj(
-        "auto1Cycle3",
-        OptionalInt.empty(),
-        4.71536,
-        new Pose2d(4.41035, 0.85281, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(4.29681, 0.78185, Rotation2d.fromRadians(-1.5708))
-    );
-    public static final ChoreoTraj auto2Cycle3 = new ChoreoTraj(
-        "auto2Cycle3",
-        OptionalInt.empty(),
-        10.22447,
-        new Pose2d(4.41035, 0.85281, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(4.29681, 0.78185, Rotation2d.fromRadians(-1.5708))
-    );
-    public static final ChoreoTraj auto1Cycle1 = new ChoreoTraj(
-        "auto1Cycle1",
-        OptionalInt.empty(),
-        5.27742,
-        new Pose2d(4.42331, 7.23145, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(4.28793, 7.32171, Rotation2d.fromRadians(1.5708))
-    );
-    public static final ChoreoTraj auto2Cycle1 = new ChoreoTraj(
-        "auto2Cycle1",
-        OptionalInt.empty(),
-        10.4168,
-        new Pose2d(4.42331, 7.23145, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(4.28793, 7.30666, Rotation2d.fromRadians(1.5708))
-    );
+    
 
     /**
      * A map between trajectory names and their corresponding data.
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-        Map.entry("autoLlanura", autoLlanura),
-        Map.entry("autoPorFavorNo", autoPorFavorNo),
-        Map.entry("autoYa", autoYa),
-        Map.entry("auto1Cycle3", auto1Cycle3),
-        Map.entry("auto2Cycle3", auto2Cycle3),
-        Map.entry("auto1Cycle1", auto1Cycle1),
-        Map.entry("auto2Cycle1", auto2Cycle1)
+    
     );
 
     /**

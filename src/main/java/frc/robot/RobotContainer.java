@@ -14,6 +14,8 @@ import frc.robot.commands.auto.auto1Cycle3;
 import frc.robot.commands.auto.auto2Cycle1;
 import frc.robot.commands.auto.auto2Cycle3;
 import frc.robot.commands.auto.autoLlanura;
+import frc.robot.commands.auto.autoPos1;
+import frc.robot.commands.auto.autoPos3;
 import frc.robot.commands.auto.mhmAuto;
 import frc.robot.commands.shooter.AutoAimCommand;
 import frc.robot.commands.swerve.DefaultSwerveDriveNew;
@@ -236,31 +238,41 @@ public class RobotContainer {
     // -- Option Chooser Official Autos --
     // # Position 3 (Down) Autos #
     autoChooser.addOption(
-        "auto1Cycle3",
+        "SANauto1Cycle3",
         new auto1Cycle3(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
             .routine()
             .cmd());
 
     autoChooser.addOption(
-        "auto2Cycle3",
+        "SANauto2Cycle3",
         new auto2Cycle3(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
             .routine()
             .cmd());
 
     // # Position 1 (Up) Autos #
     autoChooser.addOption(
-        "auto1Cycle1",
+        "SANauto1Cycle1",
         new auto1Cycle1(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
             .routine()
             .cmd());
 
     autoChooser.addOption(
-        "auto2Cycle1",
+        "SANauto2Cycle1", // mi bombooooo T-T
         new auto2Cycle1(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
             .routine()
             .cmd());
 
+    // New Autos
+    autoChooser.addOption(
+        "autoPos1",
+        new autoPos1(autoFactory, feeder, intake, intakePivot, indexer, flywheel).routine().cmd());
+
+    autoChooser.addOption(
+        "autoPos3",
+        new autoPos3(autoFactory, feeder, intake, intakePivot, indexer, flywheel).routine().cmd());
+
     // -- Last Resource T-T --
+
     autoChooser.addOption(
         "Leave and Shoot",
         new SimpleDriveIntakeShoot(drive, intakePivot, intake, flywheel, feeder, indexer));

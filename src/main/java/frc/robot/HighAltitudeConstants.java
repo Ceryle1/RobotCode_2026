@@ -209,6 +209,8 @@ public final class HighAltitudeConstants {
     public static final double FLYWHEEL_RADIUS = 0.0508;
     public static final double SLIP_FACTOR = 0.7;
 
+    public static final double autoRPM = 4900;
+
     // Motor Ports
     public static final int SHOOTER_RIGHT_MOTOR_ID = 61;
     public static final int SHOOTER_LEFT_MOTOR_ID = 62;
