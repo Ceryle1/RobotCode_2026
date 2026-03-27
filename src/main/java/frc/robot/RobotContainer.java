@@ -5,7 +5,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.HighAltitudeConstants.Shooter;
 import frc.robot.HighAltitudeConstants.Swerve;
 import frc.robot.HighAltitudeConstants.Swerve.ModuleConstants;
 import frc.robot.commands.auto.SimpleDriveIntakeShoot;
@@ -174,7 +173,8 @@ public class RobotContainer {
         new AutoFactory(drive::getPose, drive::resetPose, drive::choreoPIDController, isRed, drive);
 
     autoFactory.bind("intake", Commands.runEnd(() -> intake.run(), () -> intake.stop(), intake));
-    autoFactory.bind("shoot", new AutoAimCommand(drive, hood, flywheel, () -> 0.0, () -> 0.0));
+    autoFactory.bind(
+        "shoot", new AutoAimCommand(drive, hood, flywheel, vision, () -> 0.0, () -> 0.0));
     autoFactory.bind(
         "spinUp",
         Commands.run(
@@ -216,9 +216,6 @@ public class RobotContainer {
     coDriver.configureBindings(this);
   }
 
-  
-      
-
   /** Configures all the auto routines available on the Dashboard. */
 
   // --- Rutina de Autonomos ---
@@ -239,33 +236,29 @@ public class RobotContainer {
     // -- Option Chooser Official Autos --
     // # Position 3 (Down) Autos #
     autoChooser.addOption(
-      "auto1Cycle3", 
-      new auto1Cycle3(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
+        "auto1Cycle3",
+        new auto1Cycle3(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
             .routine()
-            .cmd()
-      );
+            .cmd());
 
-      autoChooser.addOption(
-        "auto2Cycle3", 
+    autoChooser.addOption(
+        "auto2Cycle3",
         new auto2Cycle3(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
             .routine()
             .cmd());
 
     // # Position 1 (Up) Autos #
-      autoChooser.addOption(
-      "auto1Cycle1", 
-      new auto1Cycle1(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
-            .routine()
-            .cmd()
-      );
-
-      autoChooser.addOption(
-        "auto2Cycle1", 
-        new auto2Cycle1(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
+    autoChooser.addOption(
+        "auto1Cycle1",
+        new auto1Cycle1(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
             .routine()
             .cmd());
 
-
+    autoChooser.addOption(
+        "auto2Cycle1",
+        new auto2Cycle1(autoFactory, feeder, intake, intakePivot, indexer, flywheel)
+            .routine()
+            .cmd());
 
     // -- Last Resource T-T --
     autoChooser.addOption(

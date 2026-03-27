@@ -32,7 +32,10 @@ public class auto1Cycle3 {
     traj.atTime("shoot1")
         .onTrue(
             Commands.sequence(
-                    Commands.runOnce(() -> flywheel.runVelocity(Units.rotationsPerMinuteToRadiansPerSecond(4800)), flywheel),
+                    Commands.runOnce(
+                        () ->
+                            flywheel.runVelocity(Units.rotationsPerMinuteToRadiansPerSecond(4800)),
+                        flywheel),
                     new WaitUntilCommand(() -> flywheel.onTarget(4800)),
                     Commands.parallel(
                             Commands.runEnd(() -> feeder.intake(), () -> feeder.stop(), feeder),
@@ -59,16 +62,15 @@ public class auto1Cycle3 {
                     .withTimeout(2.0)));
 
     traj.atTime("intakeOff1")
-        .onTrue(
-            Commands.sequence(
-                Commands.runOnce(() -> intake.stop(), intake)
-            )
-        );
+        .onTrue(Commands.sequence(Commands.runOnce(() -> intake.stop(), intake)));
 
     traj.atTime("shoot2")
         .onTrue(
-             Commands.sequence(
-                    Commands.runOnce(() -> flywheel.runVelocity(Units.rotationsPerMinuteToRadiansPerSecond(4800)), flywheel),
+            Commands.sequence(
+                    Commands.runOnce(
+                        () ->
+                            flywheel.runVelocity(Units.rotationsPerMinuteToRadiansPerSecond(4800)),
+                        flywheel),
                     new WaitUntilCommand(() -> flywheel.onTarget(4800)),
                     Commands.parallel(
                             Commands.runEnd(() -> feeder.intake(), () -> feeder.stop(), feeder),
@@ -86,8 +88,6 @@ public class auto1Cycle3 {
                         indexer))
                 .withTimeout(5));
   }
-
-  
 
   public AutoRoutine routine() {
     return routine;

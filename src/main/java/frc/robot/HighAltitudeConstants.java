@@ -42,7 +42,7 @@ public final class HighAltitudeConstants {
   // --- GLOBAL FLAGS ---
   // Poner en FALSE para competencia real (seguridad).
   // Poner en TRUE para habilitar el Tuning en Dashboard.
-  public static final boolean TUNING_MODE = true;
+  public static final boolean TUNING_MODE = false;
 
   // ... (Otras constantes existentes del Swerve) ...
 
@@ -159,11 +159,11 @@ public final class HighAltitudeConstants {
             );
 
     // --- DRIVE CONTROL (PID + FF) ---
-    public static final double DRIVE_KP = 0.125;
+    public static final double DRIVE_KP = 0.320;
     public static final double DRIVE_KI = 0.0;
     public static final double DRIVE_KD = 0.0;
     public static final double DRIVE_KS = 0.2;
-    public static final double DRIVE_KV = 2.05;
+    public static final double DRIVE_KV = 2.183;
 
     // --- TURN CONTROL (Profiled PID) ---
     public static final double TURN_KP = 5.0; // /5
@@ -175,7 +175,7 @@ public final class HighAltitudeConstants {
     public static final double TURN_MAX_ACCELERATION_RAD_S2 = 15.0;
 
     // --- Limits ---
-    public static final double MAX_LINEAR_SPEED_M_S = 4.5;
+    public static final double MAX_LINEAR_SPEED_M_S = 5.0;
     public static final double MAX_ANGULAR_SPEED_RAD_S = 6.28;
 
     // NUEVO: Agregado para SlewRateLimiter en SwerveModule
@@ -197,7 +197,7 @@ public final class HighAltitudeConstants {
 
   // Shooter
   public static final class Shooter {
-    public static final double MAX_FLYWHEEL_SPEED_RADS_PER_SEC = 360; // 460 was working
+    public static final double MAX_FLYWHEEL_SPEED_RADS_PER_SEC = 380; // 460 was working
     // 450
 
     public static final double KP = 0.7;
@@ -205,10 +205,6 @@ public final class HighAltitudeConstants {
     public static final double KD = 0.0;
     public static final double KS = 0.0;
     public static final double KV = 0.20;
-
-    // -- Shooter Offset --
-    public static final double SHOOTER_OFFSET = 50;
-
 
     // Motor Ports
     public static final int SHOOTER_RIGHT_MOTOR_ID = 61;
@@ -228,6 +224,8 @@ public final class HighAltitudeConstants {
     // target autoaim
     public static final double GOAL_HEIGHT = 1.9; // meters
     public static final double SHOOTER_HEIGHT = 0.428752; // meters
+
+    public static final double SHOOTER_OFFSET = 50;
   }
 
   // Pivot
@@ -245,7 +243,7 @@ public final class HighAltitudeConstants {
 
   // Indexer
   public static final class Indexer {
-    public static final double INDEXER_VOLTAGE = 0.5 * 12;
+    public static final double INDEXER_VOLTAGE = 0.4 * 12;
     public static final int INDEXER_MOTOR_ID = 51;
 
     public static final double STALL_CURRENT_AMPS = 40;

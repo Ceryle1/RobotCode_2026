@@ -94,6 +94,7 @@ public class Pato implements ControlProfile {
                 container.getDrive(),
                 container.getHood(),
                 container.getFlywheel(),
+                container.getVision(),
                 this::getDriveForward,
                 this::getDriveStrafe));
 

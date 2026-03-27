@@ -31,8 +31,11 @@ public class auto2Cycle3 {
 
     traj.atTime("shoot1")
         .onTrue(
-             Commands.sequence(
-                    Commands.runOnce(() -> flywheel.runVelocity(Units.rotationsPerMinuteToRadiansPerSecond(4800)), flywheel),
+            Commands.sequence(
+                    Commands.runOnce(
+                        () ->
+                            flywheel.runVelocity(Units.rotationsPerMinuteToRadiansPerSecond(4800)),
+                        flywheel),
                     new WaitUntilCommand(() -> flywheel.onTarget(4800)),
                     Commands.parallel(
                             Commands.runEnd(() -> feeder.intake(), () -> feeder.stop(), feeder),
@@ -60,16 +63,15 @@ public class auto2Cycle3 {
                     .withTimeout(2.0)));
 
     traj.atTime("intakeOff1")
-        .onTrue(
-            Commands.sequence(
-                Commands.runOnce(() -> intake.stop(), intake)
-            )
-        );
+        .onTrue(Commands.sequence(Commands.runOnce(() -> intake.stop(), intake)));
 
     traj.atTime("shoot2")
         .onTrue(
-             Commands.sequence(
-                    Commands.runOnce(() -> flywheel.runVelocity(Units.rotationsPerMinuteToRadiansPerSecond(4800)), flywheel),
+            Commands.sequence(
+                    Commands.runOnce(
+                        () ->
+                            flywheel.runVelocity(Units.rotationsPerMinuteToRadiansPerSecond(4800)),
+                        flywheel),
                     new WaitUntilCommand(() -> flywheel.onTarget(4800)),
                     Commands.parallel(
                             Commands.runEnd(() -> feeder.intake(), () -> feeder.stop(), feeder),
@@ -86,25 +88,21 @@ public class auto2Cycle3 {
                         feeder,
                         indexer))
                 .withTimeout(5));
-    
+
     // -- Segundo Ciclo --
     traj.atTime("intake2")
-        .onTrue(
-            Commands.sequence(
-                    Commands.runOnce(() -> intake.run(), intake)
-                    .withTimeout(2.0)));
+        .onTrue(Commands.sequence(Commands.runOnce(() -> intake.run(), intake).withTimeout(2.0)));
 
     traj.atTime("intakeOff2")
-        .onTrue(
-            Commands.sequence(
-                Commands.runOnce(() -> intake.stop(), intake)
-            )
-        );
+        .onTrue(Commands.sequence(Commands.runOnce(() -> intake.stop(), intake)));
 
     traj.atTime("shoot3")
         .onTrue(
-             Commands.sequence(
-                    Commands.runOnce(() -> flywheel.runVelocity(Units.rotationsPerMinuteToRadiansPerSecond(4800)), flywheel),
+            Commands.sequence(
+                    Commands.runOnce(
+                        () ->
+                            flywheel.runVelocity(Units.rotationsPerMinuteToRadiansPerSecond(4800)),
+                        flywheel),
                     new WaitUntilCommand(() -> flywheel.onTarget(4800)),
                     Commands.parallel(
                             Commands.runEnd(() -> feeder.intake(), () -> feeder.stop(), feeder),
@@ -121,11 +119,7 @@ public class auto2Cycle3 {
                         feeder,
                         indexer))
                 .withTimeout(5));
-
-        
   }
-
-  
 
   public AutoRoutine routine() {
     return routine;

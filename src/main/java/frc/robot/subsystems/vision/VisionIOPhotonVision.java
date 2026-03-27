@@ -1,23 +1,26 @@
 package frc.robot.subsystems.vision;
 
+import static frc.robot.subsystems.vision.VisionConstants.*;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class VisionIOPhotonVision implements VisionIO {
+
   protected final PhotonCamera camera;
   protected final Transform3d robotToCamera;
 
   /**
-   * Creates a new VisionIOPhotonVision.
-   *
-   * @param name The configured name of the camera.
-   * @param rotationSupplier The 3D position of the camera relative to the robot.
+   * @param name The configured name of the camera on the coprocessor.
+   * @param robotToCamera 3-D transform from the robot's origin to this camera.
    */
   public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
     camera = new PhotonCamera(name);
@@ -28,57 +31,88 @@ public class VisionIOPhotonVision implements VisionIO {
   public void updateInputs(VisionIOInputs inputs) {
     inputs.connected = camera.isConnected();
 
-    // Read new camera observations
     Set<Short> tagIds = new HashSet<>();
     List<PoseObservation> poseObservations = new LinkedList<>();
+
     for (var result : camera.getAllUnreadResults()) {
-      // Update latest target observation
+
+      // ── Latest target tx/ty for auto-aim ───────────────────────────────
       if (result.hasTargets()) {
+        PhotonTrackedTarget best = result.getBestTarget();
         inputs.latestTargetObservation =
             new TargetObservation(
-                Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
-                Rotation2d.fromDegrees(result.getBestTarget().getPitch()));
+                Rotation2d.fromDegrees(best.getYaw()), Rotation2d.fromDegrees(best.getPitch()));
       } else {
         inputs.latestTargetObservation = new TargetObservation(new Rotation2d(), new Rotation2d());
       }
 
-      // Add pose observation
+      if (!result.hasTargets()) continue;
+
+      // ── Multi-tag PnP (preferred for autonomous) ────────────────────────
       if (result.multitagResult.isPresent()) {
         var multitagResult = result.multitagResult.get();
 
-        // Calculate robot pose
+        // field → camera transform comes directly from PhotonVision's multi-tag solver
         Transform3d fieldToCamera = multitagResult.estimatedPose.best;
-        Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse());
-        Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
 
-        // Calculate average tag distance
+        // field → robot:  apply the inverse of robotToCamera (i.e. cameraToRobot)
+        Pose3d robotPose =
+            new Pose3d().transformBy(fieldToCamera).transformBy(robotToCamera.inverse());
+
+        // Average distance across ALL targets visible in this frame
         double totalTagDistance = 0.0;
         for (var target : result.targets) {
-          totalTagDistance += target.bestCameraToTarget.getTranslation().getNorm();
+          totalTagDistance += target.getBestCameraToTarget().getTranslation().getNorm();
         }
+        double avgTagDistance = totalTagDistance / result.targets.size();
 
-        // Add tag IDs
         tagIds.addAll(multitagResult.fiducialIDsUsed);
 
-        // Add observation
         poseObservations.add(
             new PoseObservation(
-                result.getTimestampSeconds(), // Timestamp
-                robotPose, // 3D pose estimate
-                multitagResult.estimatedPose.ambiguity, // Ambiguity
-                multitagResult.fiducialIDsUsed.size(), // Tag count
-                totalTagDistance / result.targets.size(), // Average tag distance
-                PoseObservationType.PHOTONVISION_MULTITAG)); // Observation type
+                result.getTimestampSeconds(),
+                robotPose,
+                multitagResult.estimatedPose.ambiguity,
+                multitagResult.fiducialIDsUsed.size(),
+                avgTagDistance,
+                PoseObservationType.PHOTONVISION_MULTITAG));
+
+      } else {
+        // ── Single-tag SolvePnP (auto-aim fallback) ──────────────────────
+        // Use the best target to anchor a pose estimate off the known tag pose.
+        PhotonTrackedTarget target = result.getBestTarget();
+
+        // Skip if tag isn't in the layout (unknown field element)
+        Optional<Pose3d> tagPoseOpt = aprilTagLayout.getTagPose(target.getFiducialId());
+        if (tagPoseOpt.isEmpty()) continue;
+
+        Pose3d tagPose = tagPoseOpt.get();
+        Transform3d cameraToTarget = target.getBestCameraToTarget();
+        double tagDistance = cameraToTarget.getTranslation().getNorm();
+
+        // field → tag (from layout) → camera (inverse of cameraToTarget) → robot (inverse of
+        // robotToCamera)
+        Pose3d robotPose =
+            tagPose
+                .transformBy(cameraToTarget.inverse()) // field → camera
+                .transformBy(robotToCamera.inverse()); // field → robot
+
+        tagIds.add((short) target.getFiducialId());
+
+        poseObservations.add(
+            new PoseObservation(
+                result.getTimestampSeconds(),
+                robotPose,
+                target.getPoseAmbiguity(),
+                1,
+                tagDistance,
+                PoseObservationType.PHOTONVISION_SINGLETAG));
       }
     }
 
-    // Save pose observations to inputs object
-    inputs.poseObservations = new PoseObservation[poseObservations.size()];
-    for (int i = 0; i < poseObservations.size(); i++) {
-      inputs.poseObservations[i] = poseObservations.get(i);
-    }
+    // Flush to inputs
+    inputs.poseObservations = poseObservations.toArray(new PoseObservation[0]);
 
-    // Save tag IDs to inputs objects
     inputs.tagIds = new int[tagIds.size()];
     int i = 0;
     for (int id : tagIds) {

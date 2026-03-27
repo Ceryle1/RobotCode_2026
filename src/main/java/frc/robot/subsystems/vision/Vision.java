@@ -17,6 +17,29 @@ import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
+
+  // ── Mode ──────────────────────────────────────────────────────────────────
+
+  public enum VisionMode {
+    DISABLED,
+
+    POSE_ESTIMATION,
+
+    HEADING_ONLY
+  }
+
+  private VisionMode mode = VisionMode.DISABLED;
+
+  public void setMode(VisionMode mode) {
+    this.mode = mode;
+  }
+
+  public VisionMode getMode() {
+    return mode;
+  }
+
+  // ── Core ──────────────────────────────────────────────────────────────────
+
   private final VisionConsumer consumer;
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
@@ -38,25 +61,44 @@ public class Vision extends SubsystemBase {
     }
   }
 
+  // ── Public accessors ──────────────────────────────────────────────────────
+
   /**
-   * Returns the X angle to the best target from a given camera. Useful for simple vision servoing
-   * without full pose estimation.
-   *
-   * @param cameraIndex The index of the camera to query.
+   * Horizontal angle (tx) from camera {@code cameraIndex} to the best visible target. Updated every
+   * loop regardless of VisionMode — always safe to use for heading PID.
    */
   public Rotation2d getTargetX(int cameraIndex) {
     return inputs[cameraIndex].latestTargetObservation.tx();
   }
 
+  /**
+   * True when camera {@code cameraIndex} has at least one visible target. Gate your heading PID on
+   * this so the robot doesn't spin when nothing is in frame.
+   */
+  public boolean hasTarget(int cameraIndex) {
+    var obs = inputs[cameraIndex].latestTargetObservation;
+    return obs.tx().getDegrees() != 0.0 || obs.ty().getDegrees() != 0.0;
+  }
+
+  // ── Periodic ──────────────────────────────────────────────────────────────
+
   @Override
   public void periodic() {
-    // Pull fresh data from every camera
+    // Always pull fresh camera data — needed for logging and getTargetX() in all modes
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
       Logger.processInputs("Vision/Camera" + i, inputs[i]);
     }
 
-    // Aggregated lists for summary logging
+    Logger.recordOutput("Vision/Mode", mode.name());
+
+    // DISABLED and HEADING_ONLY: log for debugging but skip pose fusion
+    logAllCameras(mode == VisionMode.POSE_ESTIMATION);
+  }
+
+  // ── Internal logging + fusion ─────────────────────────────────────────────
+
+  private void logAllCameras(boolean fusePoses) {
     List<Pose3d> allTagPoses = new LinkedList<>();
     List<Pose3d> allRobotPoses = new LinkedList<>();
     List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
@@ -70,22 +112,16 @@ public class Vision extends SubsystemBase {
       List<Pose3d> robotPosesAccepted = new LinkedList<>();
       List<Pose3d> robotPosesRejected = new LinkedList<>();
 
-      // Resolve tag poses for logging
       for (int tagId : inputs[cameraIndex].tagIds) {
-        var tagPose = aprilTagLayout.getTagPose(tagId);
-        tagPose.ifPresent(tagPoses::add);
+        aprilTagLayout.getTagPose(tagId).ifPresent(tagPoses::add);
       }
 
-      // Process each pose observation from this camera
       for (var observation : inputs[cameraIndex].poseObservations) {
 
         boolean rejectPose =
             observation.tagCount() == 0
-                // Single-tag observations with high ambiguity are too noisy to trust
                 || (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity)
-                // Robot must be on the floor (Z ≈ 0)
                 || Math.abs(observation.pose().getZ()) > maxZError
-                // Must be inside the field boundary
                 || observation.pose().getX() < 0.0
                 || observation.pose().getX() > aprilTagLayout.getFieldLength()
                 || observation.pose().getY() < 0.0
@@ -98,41 +134,32 @@ public class Vision extends SubsystemBase {
         }
         robotPosesAccepted.add(observation.pose());
 
-        // --- Standard deviation calculation ---
-        // stdDev scales with distance² and shrinks with more tags.
-        // Single-tag observations get an extra penalty multiplier.
-        double stdDevFactor =
-            Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+        if (fusePoses) {
+          double stdDevFactor =
+              Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
 
-        // Apply a larger multiplier for single-tag solves — they're noisier
-        if (observation.tagCount() == 1
-            && observation.type() != VisionIO.PoseObservationType.QUESTNAV) {
-          stdDevFactor *= 2.0;
+          if (observation.type() == VisionIO.PoseObservationType.PHOTONVISION_SINGLETAG) {
+            stdDevFactor *= 2.0;
+          }
+
+          double linearStdDev = linearStdDevBaseline * stdDevFactor;
+          double angularStdDev = angularStdDevBaseline * stdDevFactor;
+
+          if (cameraIndex < cameraStdDevFactors.length) {
+            linearStdDev *= cameraStdDevFactors[cameraIndex];
+            angularStdDev *= cameraStdDevFactors[cameraIndex];
+          }
+
+          Logger.recordOutput("Vision/Camera" + cameraIndex + "/LinearStdDev", linearStdDev);
+          Logger.recordOutput("Vision/Camera" + cameraIndex + "/AngularStdDev", angularStdDev);
+
+          consumer.accept(
+              observation.pose().toPose2d(),
+              observation.timestamp(),
+              VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
         }
-
-        // QuestNav gives a continuous, high-confidence pose — use tight fixed std devs
-        // rather than the distance-based formula (it has no "tag distance" concept).
-        if (observation.type() == VisionIO.PoseObservationType.QUESTNAV) {
-          stdDevFactor = questNavStdDevFactor;
-        }
-
-        double linearStdDev = linearStdDevBaseline * stdDevFactor;
-        double angularStdDev = angularStdDevBaseline * stdDevFactor;
-
-        // Per-camera trust multiplier
-        if (cameraIndex < cameraStdDevFactors.length) {
-          linearStdDev *= cameraStdDevFactors[cameraIndex];
-          angularStdDev *= cameraStdDevFactors[cameraIndex];
-        }
-
-        // Feed the accepted pose into the drivetrain's pose estimator
-        consumer.accept(
-            observation.pose().toPose2d(),
-            observation.timestamp(),
-            VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
       }
 
-      // Per-camera logging
       Logger.recordOutput(
           "Vision/Camera" + cameraIndex + "/TagPoses", tagPoses.toArray(new Pose3d[0]));
       Logger.recordOutput(
@@ -150,7 +177,6 @@ public class Vision extends SubsystemBase {
       allRobotPosesRejected.addAll(robotPosesRejected);
     }
 
-    // Summary logging (all cameras combined)
     Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
     Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[0]));
     Logger.recordOutput(
@@ -159,9 +185,11 @@ public class Vision extends SubsystemBase {
         "Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
   }
 
+  // ── Consumer interface ────────────────────────────────────────────────────
+
   @FunctionalInterface
-  public static interface VisionConsumer {
-    public void accept(
+  public interface VisionConsumer {
+    void accept(
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs);

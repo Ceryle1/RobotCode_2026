@@ -33,16 +33,14 @@ public class Flywheel extends SubsystemBase {
   }
 
   public boolean onTarget(double rpm) {
-      double currentRadsPerSec = getVelocityRadsPerSec();
-      
-      double currentRPM = (currentRadsPerSec * 60.0) / (2.0 * Math.PI);
+    double currentRadsPerSec = getVelocityRadsPerSec();
 
-      double error = rpm - currentRPM;
+    double currentRPM = (currentRadsPerSec * 60.0) / (2.0 * Math.PI);
 
-      return Math.abs(error) <= HighAltitudeConstants.Shooter.SHOOTER_OFFSET;
+    double error = rpm - currentRPM;
 
-    }
-
+    return Math.abs(error) <= HighAltitudeConstants.Shooter.SHOOTER_OFFSET;
+  }
 
   public void coast() {
     outputs.mode = FlywheelIO.FlywheelIOOutputMode.COAST;

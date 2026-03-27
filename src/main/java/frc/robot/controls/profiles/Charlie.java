@@ -9,7 +9,6 @@ import frc.robot.commands.indexer.IndexerEjectCommand;
 import frc.robot.commands.indexer.IndexerIntakeCommand;
 import frc.robot.commands.pivot.PivotExpandCommand;
 import frc.robot.commands.pivot.PivotWobbleCommand;
-import frc.robot.commands.shooter.AutoAimCommand;
 import frc.robot.commands.shooter.FeederPreShootCommand;
 import frc.robot.commands.shooter.FlywheelShootCommand;
 import frc.robot.controls.ControlProfile;
@@ -40,15 +39,6 @@ public class Charlie implements ControlProfile {
 
   @Override
   public void configureBindings(RobotContainer container) {
-    controller
-        .b()
-        .whileTrue(
-            new AutoAimCommand(
-                container.getDrive(),
-                container.getHood(),
-                container.getFlywheel(),
-                this::getDriveForward,
-                this::getDriveStrafe));
 
     controller.a().onTrue(container.getHood().runOnce(() -> container.getHood().setAngle(0.0)));
 
