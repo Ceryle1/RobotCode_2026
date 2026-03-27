@@ -206,6 +206,10 @@ public final class HighAltitudeConstants {
     public static final double KS = 0.0;
     public static final double KV = 0.20;
 
+    // -- Shooter Offset --
+    public static final double SHOOTER_OFFSET = 50;
+
+
     // Motor Ports
     public static final int SHOOTER_RIGHT_MOTOR_ID = 61;
     public static final int SHOOTER_LEFT_MOTOR_ID = 62;

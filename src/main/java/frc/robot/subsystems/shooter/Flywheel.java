@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.HighAltitudeConstants;
 import frc.robot.subsystems.shooter.FlywheelIO.FlywheelIOOutputs;
 import org.littletonrobotics.junction.Logger;
 
@@ -30,6 +31,18 @@ public class Flywheel extends SubsystemBase {
     outputs.mode = FlywheelIO.FlywheelIOOutputMode.VELOCITY;
     outputs.velocityRadsPerSec = velocityRadsPerSec;
   }
+
+  public boolean onTarget(double rpm) {
+      double currentRadsPerSec = getVelocityRadsPerSec();
+      
+      double currentRPM = (currentRadsPerSec * 60.0) / (2.0 * Math.PI);
+
+      double error = rpm - currentRPM;
+
+      return Math.abs(error) <= HighAltitudeConstants.Shooter.SHOOTER_OFFSET;
+
+    }
+
 
   public void coast() {
     outputs.mode = FlywheelIO.FlywheelIOOutputMode.COAST;

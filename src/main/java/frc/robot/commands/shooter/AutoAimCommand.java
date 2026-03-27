@@ -22,7 +22,7 @@ public class AutoAimCommand extends Command {
   private final Supplier<Double> strafeSupplier;
 
   private final PIDController headingPID =
-      new PIDController(HighAltitudeConstants.Auto.PATHPLANNER_ROTATION_KP, 0, 0);
+      new PIDController(HighAltitudeConstants.Auto.PATHPLANNER_ROTATION_KP, 0, HighAltitudeConstants.Auto.PATHPLANNER_ROTATION_KD);
 
   public AutoAimCommand(
       SwerveDrive drive,

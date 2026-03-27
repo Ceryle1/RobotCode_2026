@@ -5,6 +5,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.HighAltitudeConstants.Shooter;
 import frc.robot.HighAltitudeConstants.Swerve;
 import frc.robot.HighAltitudeConstants.Swerve.ModuleConstants;
 import frc.robot.commands.auto.SimpleDriveIntakeShoot;
@@ -214,6 +215,9 @@ public class RobotContainer {
     driver.configureBindings(this);
     coDriver.configureBindings(this);
   }
+
+  
+      
 
   /** Configures all the auto routines available on the Dashboard. */
 
