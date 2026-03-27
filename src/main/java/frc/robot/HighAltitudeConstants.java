@@ -206,6 +206,9 @@ public final class HighAltitudeConstants {
     public static final double KS = 0.0;
     public static final double KV = 0.20;
 
+    public static final double FLYWHEEL_RADIUS = 0.0508;
+    public static final double SLIP_FACTOR = 0.7;
+
     // Motor Ports
     public static final int SHOOTER_RIGHT_MOTOR_ID = 61;
     public static final int SHOOTER_LEFT_MOTOR_ID = 62;
@@ -243,7 +246,7 @@ public final class HighAltitudeConstants {
 
   // Indexer
   public static final class Indexer {
-    public static final double INDEXER_VOLTAGE = 0.4 * 12;
+    public static final double INDEXER_VOLTAGE = 0.6 * 12;
     public static final int INDEXER_MOTOR_ID = 51;
 
     public static final double STALL_CURRENT_AMPS = 40;
@@ -252,13 +255,13 @@ public final class HighAltitudeConstants {
 
   // Intake
   public static final class Intake {
-    public static final double INTAKE_VOLTAGE = 0.40000067 * 12;
+    public static final double INTAKE_VOLTAGE = 0.3 * 12;
     public static final int INTAKE_MOTOR_ID = 42;
   }
 
   // Feeder
   public static final class Feeder {
-    public static final double FEEDER_VOLTAGE = 0.4 * 12;
+    public static final double FEEDER_VOLTAGE = 0.5 * 12;
     public static final int FEEDER_MOTOR_ID = 52;
   }
 

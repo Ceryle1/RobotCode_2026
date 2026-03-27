@@ -62,8 +62,7 @@ public class Pato implements ControlProfile {
 
     // --- DRIVER ASSISTS ---
 
-    controller.leftTrigger().onTrue(new IntakeAbsorbCommand(container.getIntake()));
-    controller.rightBumper().whileTrue(new IntakeAbsorbCommand(container.getIntake()));
+    controller.leftTrigger().whileTrue(new IntakeAbsorbCommand(container.getIntake()));
 
     // Botón X: DriveToPose (PID Local) - Ajuste Fino
     controller
